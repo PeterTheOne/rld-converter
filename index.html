@@ -1,0 +1,59 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>rld-converter</title>
+
+    <script type="text/javascript" src="jquery-1.11.3.min.js"></script>
+    <script type="text/javascript">
+      $(function() {
+
+        $('#file').on('change', function(event) {
+          var files = $(this).prop('files');
+          if (files.length < 1) {
+            return;
+          }
+
+          var firstFile = files[0];
+
+          var reader = new FileReader();
+          reader.readAsBinaryString(firstFile);
+          reader.onload = function(event) {
+            processFile(event.target.result);
+          }
+        });
+
+        function processFile(data) {
+          for (var start = 0; start < data.length, start < 50000; start++) {
+            var currentByte = data.charCodeAt(start);
+            var currentByteBinary = currentByte.toString(2);
+            var currentByteHex = currentByte.toString(16);
+            var descrambled = descramble(currentByte);
+            var descrambledBinary = descrambled.toString(2);
+            var descrambledHex = currentByte.toString(16);
+            $('pre').append('[' + start + ']: ' + currentByte + ' -> ' + currentByteBinary + ' -> ' + descrambled + ' -> ' + descrambledBinary + '\n');
+          }
+        }
+
+        // see: http://stefan.schuermans.info/rdcam/scrambling.html
+        var magicValue = 0x38;
+        function descramble(byte) {
+          var a = (byte + 0xFF) & 0xFF;
+          var b = a ^ magicValue;
+          byte = b & 0x7E | b >> 7 & 0x01 | b << 7 & 0x80;
+          return byte;
+        }
+
+      });
+    </script>
+  </head>
+  <body>
+    <h1>rld-converter</h1>
+    <form>
+      <label for="file">Import *.rld file</label><br />
+      <input type="file" id="file" />
+    </form>
+    <h2>Output</h2>
+    <pre></pre>
+  </body>
+</html>
